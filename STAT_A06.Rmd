@@ -66,32 +66,37 @@ OrdwayBirds%>%
 ```{r}
 # unique species in original data (including mis-spellings)
 
+num_names<-n_distinct(OrdwayBirds$SpeciesName)
+num_names
 
+# unique species in the  list
 
-# unique species in the clean list
+data("OrdwaySpeciesNames", package = "dcData")
 
-data("OrdwayBirds", package = "dcData")
-
+num_names_cleaned<-n_distinct(OrdwaySpeciesNames$SpeciesNameCleaned)
+num_names_cleaned
 
 ```
 
 
 ### Step 2
-  
-
-
-
 ```{r}
 # inspect OrdwaySpeciesNames
-
+OrdwaySpeciesNames%>%
+  head()
 
 # inner join
 
-
+Corrected <-
+  OrdwayBirds %>%
+  inner_join( OrdwaySpeciesNames ) %>% 
+  select( Species = SpeciesNameCleaned, Month, Day ) %>%
+  na.omit()   
 
 
 # inspect the data after the join
-
+Corrected%>%
+  head()
 
 ```
 
@@ -103,14 +108,28 @@ We want to identify the top 5-6 bird species sighted at the Katherine Ordway Nat
 ```{r}
 # count sightings by species in descending order
 
+Counts <- Corrected %>%
+  group_by(Species) %>%
+  summarize(Total_Captures = n()) %>%
+  arrange(desc(Total_Captures))
 
 
 
 # a hint in the text book recommends displaying the top 10 species to choose our threshold
 
-
+head(Counts, n = 10)
 
 # define a sightings threshold; produce a table with only birds belonging to major species
+
+Threshold <- 50
+
+Counts <- Corrected %>%
+  group_by(Species) %>%
+  summarize(Total_Captures = n()) %>%
+  filter(Total_Captures > Threshold) %>%
+  arrange(desc(Total_Captures))
+
+Majors <- inner_join(Corrected, Counts, by = "Species")
 
 
 
