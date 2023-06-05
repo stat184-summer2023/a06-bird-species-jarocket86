@@ -115,13 +115,14 @@ Counts <- Corrected %>%
 
 
 
+
 # a hint in the text book recommends displaying the top 10 species to choose our threshold
 
 head(Counts, n = 10)
 
 # define a sightings threshold; produce a table with only birds belonging to major species
 
-Threshold <- 50
+Threshold <- 700
 
 Counts <- Corrected %>%
   group_by(Species) %>%
@@ -144,7 +145,9 @@ We now want to produce a month-by-month count for each of the major species, and
 ```{r}
 # prepare glyph-ready data table called `ByMonth`
 
-
+ByMonth <- Majors %>%
+  group_by(Month, Species) %>%
+  summarize(Total_Captures = n())
 
 ```
 
@@ -156,11 +159,11 @@ Now use the ggplot template below to generate the desired graph. (Remark you can
 # ggplot commands
 
 ByMonth %>% 
-  ggplot(aes(x = Month, y = count, color = Species)) + 
+  ggplot(aes(x = Month, y = Total_Captures, colour = Species)) + 
   geom_line()
 
-ByMonth %>% ggplot(aes(x=Month,y=count ,fill=Species)) +
-  geom_bar(stat='identity',position='stack', width=.9) 
+ByMonth %>% ggplot(aes(x=Month,y=Total_Captures ,fill=Species)) +
+  geom_bar(stat='identity',position='stack', width=.9)
 
 ```
 
@@ -168,14 +171,37 @@ According to the graph, we can answer the questions posed:
 
 ##### 1. Which species are present year-round?  
 
+American Goldflinch is present year around
+
+ 
+
 
 
 ##### 2. Which species are migratory, that is, primarily present in one or two seasons?
 
+Field Sparrow is only present in Summer
 
+State-colored Junco is present in the Winter but not in the summer 
 
+Black-capped Chickadee is present in the Winter but isn't present in the summer 
+
+Lincoln's Sparrow is only present for 2 months 
+
+Tree swallow is not present for 2 months of summer 
 
 ##### 3. What is the peak month for each major species? (bullet list)
+
+American Goldflinch-october
+
+Black-capped Chickadee-November 
+
+Field Sparrow-May
+
+Lincoln's Sparrow-October
+
+State-colored Junco-October
+
+Tree Swallow- Match
 
 
 
@@ -185,6 +211,13 @@ According to the graph, we can answer the questions posed:
 
 
 ```{r}
+Threshold <- 100
 
+SixMonthSpecies <- ByMonth %>%
+  group_by(Species) %>%
+  summarize(Months = n_distinct(Month[Total_Captures >= Threshold])) %>%
+  filter(Months >= 6)
+
+SixMonthSpecies
 ```
 
